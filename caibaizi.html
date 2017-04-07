@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+<head>
+<title>踩黑字游戏</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+
+<style type="text/css">
+#tou{
+    margin:0 auto;
+    text-align:center
+}
+
+#main{
+    width:400px;
+    height:400px;
+    border: 1px solid black;
+    margin:0 auto;
+    position:relative;
+    overflow:hidden; 
+}
+
+#start{
+    width:50px;
+    height:20px;
+    margin:0 auto;
+}
+
+#header{
+    width:100%;
+    height:400px;    
+    position:relative;
+    top:-400px;
+}
+
+.row{
+    width:100%;
+    height:100px;
+}
+
+.cell{
+    width:100px;
+    height:100px;
+    float:left;row
+}
+
+.black{
+    background:black;
+}
+</style>
+</head>
+    <body>
+        <div id="tou">
+            <p>规则:只要鼠标点到黑快就得10分，每通一关加10分，20分递增。3500分为通关。点击开始游戏</p><br />
+            <p>注意:输了请不要把鼠标移到方框内</p>
+            <h3 style="text-align:center">分数:<p id="score" name="score">0</p></h3>
+        <div id="main">           
+            <div id="header"></div>
+        </div> 
+        <div id="start"><input type="submit" value="开始游戏" onclick="kaishi();"/></div>
+    </body>
+    <script type="text/javascript">
+    var speed = 2;      //游戏初始速度
+    var state = 0;      //游戏状态
+    var score = 0;
+    var tiemr = null;   //计时器
+    //初始化
+    function init(){
+        for(var i=0;i<4;i++){
+            crow();
+        }
+
+        //绑定一个事物，一点黑快就让它变白快
+        $('main').onmouseover = function(ev){
+             judge(ev);                               
+        }
+
+    }
+
+    //功能：生成div
+    function cdiv(classname){
+        var div = document.createElement('div');
+        div.className = classname;
+        return div;
+    }
+
+    //功能：按id获取对象
+    function $(id){
+        return document.getElementById(id);
+    }
+
+    //功能，生成一行div，里面有四个div
+    function crow(){
+        var header = $('header');
+        var row = cdiv('row');
+        var arr = randBlack();
+        for(var i=0;i<=3;i++){
+            row.appendChild(cdiv(arr[i]));
+        }
+        if(header.firstChild == null){
+            header.appendChild(row);
+        }else{
+            header.insertBefore(row,header.firstChild);   //在row面前加入一行div
+        }
+        
+    }
+    
+    //功能：随机生成一个黑色的方块
+    function randBlack(){
+        var arr = ['cell','cell','cell','cell'];
+        var i = Math.floor(Math.random()*4);
+        arr[i] = ['cell black'];
+        return arr;
+    }
+
+    //功能：每次让header div块向下移动
+    function move(){
+        var score = $('score');
+        var header = $('header');
+        var top = parseInt(window.getComputedStyle(header,null)['top']);
+        if(parseInt(score.innerHTML) == 100){
+            speedGame();
+            top = -400;
+            score.innerHTML = 110;
+        }
+        
+        if(parseInt(score.innerHTML) == 250){
+            speedGame();
+            top = -400;
+            score.innerHTML = 270;
+        }
+        
+        if(parseInt(score.innerHTML) == 500){
+            speedGame();
+            top = -400;
+            score.innerHTML = 530;
+        }
+
+        if(parseInt(score.innerHTML) == 900){
+            speedGame();
+            top = -400;
+            score.innerHTML = 940;
+        }
+
+        if(parseInt(score.innerHTML) == 1500){
+            speedGame();
+            top = -400;
+            score.innerHTML = 1550;
+        }
+
+        if(parseInt(score.innerHTML) == 3000){
+            speedGame();
+            top = -400;
+            score.innerHTML = 3500;
+        }
+
+        top += speed;
+        header.style.top = top + 'px';
+
+        if(header.lastChild.bj != 1 && (top==0)){
+            if(state == 3){
+                alert('想作弊?没门!请重新挑战');
+                return;
+            }
+            fail();
+            return;
+        
+        }   
+        //如果header的top为0，就在头部自动生成div块
+        if(top == 0){
+            crow();
+            header.style.top = '-100px';
+            remove();
+        }
+        
+        
+    }
+    
+    //删除main块外的div
+    function remove(){
+        var header = $('header');
+        header.removeChild(header.lastChild);
+    }
+
+    //开始，用一个计时器来让header div块不断的下滑
+    function start(){
+        tiemr = window.setInterval('move()',30);
+    }
+    
+    //功能：记分
+    function score1(){
+        var score = $('score');
+        score.innerHTML = parseInt(score.innerHTML) + 10;
+    }
+
+    //功能：判断输
+    function fail(){
+        clearInterval(tiemr);
+        state = 3;
+        alert('水老，游戏结束,请重新挑战');
+    }
+
+    //功能：判断游戏是否可以结束
+    function judge(ev){
+        if(state == 3){
+            alert('请重新挑战');
+            return;
+        }
+
+        //判断，如果点到白快就结束游戏
+        //if(ev.target.className.indexOf('black') == -1){
+            //fail();                
+        //}else{
+        if(ev.target.className == 'cell black'){
+            ev.target.className = 'cell';
+            ev.target.parentNode.bj = 1;
+            score1();
+        }
+            
+        //}       
+    }
+    
+    //提升等级加速
+    function speedGame(){
+        var score = $('score');
+        if(parseInt(score.innerHTML) == 100){
+            speed = 4;
+        }else if(parseInt(score.innerHTML) == 250){
+            speed = 5;
+        }else if(parseInt(score.innerHTML) == 500){
+            speed = 10;
+        }else if(parseInt(score.innerHTML) == 900){
+            speed = 20;
+        }else if(parseInt(score.innerHTML) == 1500){
+            speed = 25;
+        }else if(parseInt(score.innerHTML) == 3000){
+            alert('你妹的，你作弊!');
+        }
+    }
+    
+    //开始游戏
+    function kaishi(){
+        if(state == 3){
+            alert('请刷新页面');
+            return;
+        }
+        init();
+        start();
+    }
+    
+    </script>
+</html>
